@@ -21,15 +21,19 @@
     "@sap/cds-dk": ">=8"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "watch-interaction_items": "cds watch --open interaction_items/webapp/index.html?sap-ui-xx-viewCache=false"
   },
   "cds": {
     "requires": {
-      "auth": "mocked",
+      "auth": "xsuaa",
       "db": "hana",
       "[production]": {
         "auth": "xsuaa"
       }
     }
-  }
+  },
+  "sapux": [
+    "app/interaction_items"
+  ]
 }
