@@ -1,2 +1,2 @@
 
-using from './interaction_items/annotations';
+using from './interactionFront/annotations';

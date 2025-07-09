@@ -2,13 +2,11 @@ _schema-version: 3.3.0
 ID: MyHANAApp
 description: A simple CAP project.
 version: 1.0.0
+
 modules:
 - name: MyHANAApp-srv
   type: nodejs
   path: gen/srv
-  requires:
-  - name: MyHANAApp-auth
-  - name: MyHANAApp-db
   provides:
   - name: srv-api
     properties:
@@ -18,39 +16,25 @@ modules:
     instances: 1
   build-parameters:
     builder: npm-ci
+    ignore:
+      - "node_modules/"
+  requires:
+    - name: MyHANAApp-auth
+    - name: MyHANAAppHDIContainer
+    - name: MyHANAApp-destination-service
+
 - name: MyHANAApp-db-deployer
   type: hdb
   path: gen/db
   requires:
-  - name: MyHANAApp-db
+  - name: MyHANAAppHDIContainer
+  - name: MyHANAApp-auth
   parameters:
     buildpack: nodejs_buildpack
-- name: MyHANAApp
-  type: approuter.nodejs
-  path: app/router
-  requires:
-  - name: srv-api
-    group: destinations
-    properties:
-      forwardAuthToken: true
-      name: srv-api
-      url: ~{srv-url}
-  - name: MyHANAApp-auth
-  - name: MyHANAApp-destination-service
-    group: destinations
-    properties:
-      forwardAuthToken: false
-      name: ui5
-      url: https://ui5.sap.com
-  provides:
-  - name: app-api
-    properties:
-      app-protocol: ${protocol}
-      app-uri: ${default-uri}
-  parameters:
-    disk-quota: 256M
-    keep-existing-routes: true
-    memory: 256M
+  build-parameters:
+    ignore:
+      - "node_modules/"
+
 - name: MyHANAApp-app-content
   type: com.sap.application.content
   path: .
@@ -58,62 +42,113 @@ modules:
   - name: MyHANAApp-repo-host
     parameters:
       content-target: true
+  - name: MyHANAApp-destination-service
   build-parameters:
     build-result: resources
     requires:
-    - artifacts:
-      - interactionitems.zip
-      name: interactionitems
+    - name: interactionFront
+      artifacts:
+        - interactionFront.zip
       target-path: resources/
-- name: interactionitems
+
+  # ------------- APPLICATION: REGISTER ----------------
+- name: interactionFront
+  # ------------------------------------------------------------
   type: html5
-  path: app/interaction_items
+  path: app/interactionFront
   build-parameters:
     build-result: dist
     builder: custom
     commands:
-    - npm install
-    - npm run build:cf
+      - npm install
+      - npm run build
     supported-platforms: []
-resources:
-- name: MyHANAApp-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      oauth2-configuration:
-        redirect-uris:
-        - https://~{app-api/app-uri}/**
-      tenant-mode: dedicated
-      xsappname: MyHANAApp-${org}-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
+
+  # ------------------ DESTINATION CONTENT ---------------------
+- name: MyHANAApp-destinationcontent
+  # ------------------------------------------------------------
+  type: com.sap.application.content
+  build-parameters:
+    no-source: true
   requires:
-  - name: app-api
-- name: MyHANAApp-db
+    - name: MyHANAApp-auth
+      parameters:
+        service-key:
+          name: MyHANAApp-auth-key
+    - name: MyHANAApp-repo-host
+      parameters:
+        service-key:
+          name: MyHANAApp-repo-host-key
+    - name: MyHANAApp-destination-service
+      parameters:
+        content-target: true
+    - name: srv-api
+  parameters:
+    content:
+      instance:
+        existing_destinations_policy: update
+        destinations:
+          - Name: MyHANAApp-repo-host
+            ServiceInstanceName: MyHANAApp-repo-host
+            ServiceKeyName: MyHANAApp-repo-host-key
+            sap.cloud.service: MyHANAAppService
+          - Name: MyHANAApp-auth
+            Authentication: OAuth2UserTokenExchange
+            ServiceInstanceName: MyHANAApp-auth
+            ServiceKeyName: MyHANAApp-auth-key
+            sap.cloud.service: MyHANAAppService
+
+resources:
+- name: MyHANAAppHDIContainer #TGWholesaleMasterHDIContainer
   type: com.sap.xs.hdi-container
   parameters:
     service: hana
     service-plan: hdi-shared
+    config:
+      database_id: "f9a40348-0942-451a-a7ba-7146e0c22e76"
+      schema: "6F0ED5C0A89E4FD69828B6EEF0C3C3F2"
+    properties:
+      hdi-service-name: ${service-name}
+
+- name: MyHANAApp-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: xsuaa
+    service-plan: application
+    path: ./xs-security.json
+    config:
+    xsappname: MyHANAApp-${space}
+    tenant-mode: dedicated
+
+- name: MyHANAApp-repo-runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-runtime
+
 - name: MyHANAApp-repo-host
   type: org.cloudfoundry.managed-service
   parameters:
     service: html5-apps-repo
-    service-name: MyHANAApp-html5-service
     service-plan: app-host
+
 - name: MyHANAApp-destination-service
   type: org.cloudfoundry.managed-service
+  requires:
+    - name: srv-api
   parameters:
     config:
-      HTML5Runtime_enabled: false
+      HTML5Runtime_enabled: true
       init_data:
         instance:
           destinations:
           - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
+            Name: MyHANAApp-srv
+            URL: ~{srv-api/srv-url}
             Type: HTTP
-            URL: https://ui5.sap.com
+            ProxyType: Internet
+            HTML5.ForwardAuthToken: true
+            HTML5.DynamicDestination: true
           existing_destinations_policy: update
       version: 1.0.0
     service: destination

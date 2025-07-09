@@ -8,9 +8,9 @@ sap.ui.define(['sap/fe/test/ObjectPage'], function(ObjectPage) {
 
     return new ObjectPage(
         {
-            appId: 'interactionitems',
-            componentId: 'Interactions_ItemsObjectPage',
-            contextPath: '/Interactions_Header/items'
+            appId: 'interactionFront',
+            componentId: 'Interactions_HeaderObjectPage',
+            contextPath: '/Interactions_Header'
         },
         CustomPageDefinitions
     );

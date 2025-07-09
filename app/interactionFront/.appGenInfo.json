@@ -5,7 +5,7 @@
     "serviceType": "Local Cap",
     "metadataFilename": "",
     "serviceUrl": "http://localhost:4004/odata/v4/catalog/",
-    "appName": "interaction_items",
+    "appName": "interactionitems",
     "appTitle": "Interaction Items Lists",
     "appDescription": "An SAP Fiori application.",
     "appNamespace": "",
@@ -28,6 +28,6 @@
         "value": "items"
       }
     ],
-    "launchText": "In order to launch the generated app, simply start your CAP project and navigate to the following location in your browser:\n\nhttp://localhost:4004/interaction_items/webapp/index.html"
+    "launchText": "In order to launch the generated app, simply start your CAP project and navigate to the following location in your browser:\n\nhttp://localhost:4004/interactionitems/webapp/index.html"
   }
 }

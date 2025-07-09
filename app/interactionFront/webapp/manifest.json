@@ -1,14 +1,9 @@
 {
   "_version": "1.65.0",
   "sap.app": {
-    "id": "interactionitems",
+    "id": "interactionFront",
     "type": "application",
-    "i18n": {
-      "bundleUrl": "i18n/i18n.properties",
-      "supportedLocales": [
-        ""
-      ]
-    },
+    "i18n": "i18n/i18n.properties",
     "applicationVersion": {
       "version": "0.0.1"
     },
@@ -22,11 +17,26 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/catalog/",
+        "uri": "odata/v4/catalog/",
         "type": "OData",
         "settings": {
           "annotations": [],
           "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "intent1": {
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          },
+          "semanticObject": "interaction",
+          "action": "update",
+          "title": "interactionFront",
+          "info": "update",
+          "subTitle": ""
         }
       }
     }
@@ -47,6 +57,9 @@
       "phone": true
     }
   },
+  "sap.platform.cf": {
+    "ui5VersionNumber": "1.136.2"
+  },
   "sap.ui5": {
     "flexEnabled": true,
     "dependencies": {
@@ -65,10 +78,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "interactionitems.i18n.i18n",
-          "supportedLocales": [
-            ""
-          ]
+          "bundleName": "interactionFront.i18n.i18n"
         }
       },
       "": {
@@ -82,12 +92,7 @@
       },
       "@i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
-        "uri": "i18n/i18n.properties",
-        "settings": {
-          "supportedLocales": [
-            ""
-          ]
-        }
+        "uri": "i18n/i18n.properties"
       }
     },
     "resources": {
@@ -174,5 +179,9 @@
   "sap.fiori": {
     "registrationIds": [],
     "archeType": "transactional"
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "MyHANAAppService"
   }
 }

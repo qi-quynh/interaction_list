@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "watch-interaction_items": "cds watch --open interaction_items/webapp/index.html?sap-ui-xx-viewCache=false",
+    "watch-interactionFront": "cds watch --open interactionFront/webapp/index.html?sap-ui-xx-viewCache=false",
     "undeploy": "cf undeploy MyHANAApp --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
@@ -39,6 +39,6 @@
     }
   },
   "sapux": [
-    "app/interaction_items"
+    "app/interactionFront"
   ]
 }
